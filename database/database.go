@@ -8,16 +8,16 @@ import (
 )
 
 func InitDB(connectionString string) (*sql.DB, error) {
-	// open database
+	// Open database
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		return  nil, err
+		return nil, err
 	}
 
-	// test connection
+	// Test connection
 	err = db.Ping()
 	if err != nil {
-		return  nil, err
+		return nil, err
 	}
 
 	// Set connection pool settings (optional tapi recommended)

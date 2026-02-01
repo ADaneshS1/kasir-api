@@ -10,14 +10,13 @@ import (
 )
 
 type ProductHandler struct {
-	service *services.ProductService 
+	service *services.ProductService
 }
 
-func NewProductHandler (service *services.ProductService) *ProductHandler {
+func NewProductHandler(service *services.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
-// HandleProducts - GET /api/produk
 // HandleProducts - GET /api/produk
 func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
