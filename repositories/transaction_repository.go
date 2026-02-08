@@ -102,3 +102,46 @@ for i := range details {
 
 	return res, nil
 }
+
+func (repo *TransactionRepository) GetSalesReport(startDate, endDate string) (models.SalesSummaryResponse, error) {
+    var report models.SalesSummaryResponse
+
+    summaryQuery := `
+        SELECT 
+            COALESCE(SUM(total_amount), 0), 
+            COUNT(id) 
+        FROM transactions 
+        WHERE created_at::date BETWEEN $1 AND $2`
+
+    err := repo.db.QueryRow(summaryQuery, startDate, endDate).Scan(
+        &report.TotalRevenue,
+        &report.TotalTransaksi,
+    )
+    if err != nil {
+        return report, err
+    }
+
+    topProductQuery := `
+        SELECT 
+            p.name, 
+            SUM(td.quantity) as total_qty
+        FROM transaction_details td
+        JOIN products p ON td.product_id = p.id
+        JOIN transactions t ON td.transaction_id = t.id
+        WHERE t.created_at::date BETWEEN $1 AND $2
+        GROUP BY p.name
+        ORDER BY total_qty DESC
+        LIMIT 1`
+
+    err = repo.db.QueryRow(topProductQuery, startDate, endDate).Scan(
+        &report.ProdukTerlaris.Nama,
+        &report.ProdukTerlaris.QtyTerjual,
+    )
+
+    if err != nil {
+        report.ProdukTerlaris.Nama = "Belum ada transaksi"
+        report.ProdukTerlaris.QtyTerjual = 0
+    }
+
+    return report, nil
+}
